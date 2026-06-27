@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class PlayerMove : MonoBehaviour
@@ -13,6 +14,7 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] private Transform groundCheckPos;
     [SerializeField] private Vector2 groundCheckSize = new Vector2(0.5f, 0.1f);
     [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private string sceneName;
 
     private Rigidbody2D rigid;
     private float horizontalInput;
@@ -68,13 +70,14 @@ public class PlayerMove : MonoBehaviour
             rigid.gravityScale = 2f;
         }
 
+        // 애니메이션 상태 전환: 이동 중이면 isWalk를 true로, 멈춰있으면 false로 설정
         if(rigid.linearVelocity.x >= 0.1f || rigid.linearVelocity.x <= -0.1f)
         {
-            anim.SetBool("isWalking", true);
+            anim.SetBool("isWolk", true);
         }
         else
         {
-            anim.SetBool("isWalking", false);
+            anim.SetBool("isWolk", false);
         }
 
         // 플레이어가 일정 거리 이상 아래로 떨어지면 사망 처리
@@ -106,6 +109,14 @@ public class PlayerMove : MonoBehaviour
         isSprinting = value.isPressed;
     }
 
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Door"))
+        {
+            LoadScene(); // 씬 전환 함수 호출
+        }
+    }
+
     // 에디터 뷰에서 바닥 체크 범위를 시각적으로 확인하기 위함
     private void OnDrawGizmos()
     {
@@ -127,5 +138,10 @@ public class PlayerMove : MonoBehaviour
             transform.position = initialPosition.position;
             rigid.linearVelocity = Vector2.zero; // 속도 초기화
         }
+    }
+
+    void LoadScene()
+    {
+        SceneManager.LoadScene(sceneName); // "NextSceneName"을 실제 씬 이름으로 변경
     }
 }
