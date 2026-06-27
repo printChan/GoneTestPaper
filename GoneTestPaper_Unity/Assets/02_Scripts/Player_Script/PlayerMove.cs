@@ -23,16 +23,29 @@ public class PlayerMove : MonoBehaviour
     [SerializeField] private float fallThreshold = -10f; // 플레이어가 떨어지면 사망 처리할 y 좌표
     [SerializeField] public Transform initialPosition; // 플레이어의 초기 위치를 저장할 변수
 
+    SpriteRenderer spriteRenderer;
+    Animator anim;
 
     void Awake()
     {
         rigid = GetComponent<Rigidbody2D>();
+        spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        anim = GetComponentInChildren<Animator>();
     }
 
     void Update()
     {
         // 바닥 체크 (점프 중복 방지)
         isGrounded = Physics2D.OverlapBox(groundCheckPos.position, groundCheckSize, 0f, groundLayer);
+
+        // filpX 설정: 이동 방향에 따라 스프라이트 좌우 반전
+        if (rigid.linearVelocityX > 0)
+        {
+            spriteRenderer.flipX = true; // 오른쪽 이동 시
+        }else if (rigid.linearVelocityX < 0)
+        {
+            spriteRenderer.flipX = false; // 왼쪽 이동 시
+        }
     }
 
     void FixedUpdate()
@@ -53,6 +66,15 @@ public class PlayerMove : MonoBehaviour
         {
             // 점프 중이거나 바닥에 있을 때는 기본 중력 적용
             rigid.gravityScale = 2f;
+        }
+
+        if(rigid.linearVelocity.x >= 0.1f || rigid.linearVelocity.x <= -0.1f)
+        {
+            anim.SetBool("isWalking", true);
+        }
+        else
+        {
+            anim.SetBool("isWalking", false);
         }
 
         // 플레이어가 일정 거리 이상 아래로 떨어지면 사망 처리
